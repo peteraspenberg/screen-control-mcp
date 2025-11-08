@@ -9,10 +9,15 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 // @ts-ignore - screenshot-desktop doesn't have type definitions
 import screenshot from "screenshot-desktop";
-import * as robot from "robotjs";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
+
+// robotjs requires CommonJS import
+const require = createRequire(import.meta.url);
+// @ts-ignore - robotjs doesn't have type definitions
+const robot = require("robotjs");
 
 interface ScreenInfo {
   id: number;
@@ -363,6 +368,36 @@ class ScreenControlServer {
       let img: Buffer;
       let screens: any[];
 
+      // Try using robotjs first (works better with permissions)
+      try {
+        if (screenId === undefined || screenId === 0) {
+          // robotjs captures primary screen
+          img = robot.captureScreen();
+          // Convert to base64 data URI
+          const base64 = img.toString("base64");
+          const mimeType = format === "jpg" ? "image/jpeg" : "image/png";
+          const dataUri = `data:${mimeType};base64,${base64}`;
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  format,
+                  dataUri,
+                  size: img.length,
+                  screenId: screenId || 0,
+                }),
+              },
+            ],
+          };
+        }
+      } catch (robotError) {
+        // Fall back to screenshot-desktop if robotjs fails
+      }
+
+      // Fallback to screenshot-desktop
       if (screenId !== undefined) {
         screens = await screenshot.listDisplays();
         if (screenId < 0 || screenId >= screens.length) {
