@@ -26,10 +26,6 @@ interface ScreenInfo {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize robotjs
-robot.setMouseDelay(2);
-robot.setKeyboardDelay(10);
-
 class ScreenControlServer {
   private server: Server;
   private screenshotDir: string;
