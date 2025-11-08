@@ -7,11 +7,21 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+// @ts-ignore - screenshot-desktop doesn't have type definitions
 import screenshot from "screenshot-desktop";
 import * as robot from "robotjs";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { fileURLToPath } from "url";
+
+interface ScreenInfo {
+  id: number;
+  name?: string;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -325,7 +335,7 @@ class ScreenControlServer {
             text: JSON.stringify(
               {
                 count: screens.length,
-                screens: screens.map((screen, index) => ({
+                screens: screens.map((screen: any, index: number) => ({
                   id: index,
                   name: screen.name || `Screen ${index + 1}`,
                   width: screen.width,
@@ -406,7 +416,7 @@ class ScreenControlServer {
                   width: screenSize.width,
                   height: screenSize.height,
                 },
-                displays: screens.map((screen, index) => ({
+                displays: screens.map((screen: any, index: number) => ({
                   id: index,
                   name: screen.name || `Display ${index + 1}`,
                   width: screen.width,
